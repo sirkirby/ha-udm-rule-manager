@@ -1,0 +1,21 @@
+{
+    "config": {
+      "step": {
+        "user": {
+          "title": "Connect to UDM",
+          "description": "Set up UDM Rule Manager to manage your UniFi Dream Machine rules.",
+          "data": {
+            "host": "Host",
+            "username": "Username",
+            "password": "Password"
+          }
+        }
+      },
+      "error": {
+        "cannot_connect": "Failed to connect to UDM. Please check your credentials and try again."
+      },
+      "abort": {
+        "already_configured": "UDM Rule Manager is already configured"
+      }
+    }
+  }
