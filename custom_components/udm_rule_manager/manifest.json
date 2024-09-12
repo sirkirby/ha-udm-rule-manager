@@ -5,6 +5,7 @@
     "integration_type": "hub",
     "dependencies": [],
     "codeowners": ["@sirkirby"],
+    "issue_tracker": "https://github.com/sirkirby/ha_udm_rule_manager/issues",
     "requirements": ["aiohttp"],
     "iot_class": "local_polling",
     "version": "0.1.0",
