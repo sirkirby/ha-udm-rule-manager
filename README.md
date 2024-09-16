@@ -4,7 +4,7 @@ Integrates with your Unifi Dream Machine to allow basic management of firewall r
 
 ## Installation
 
-Install via HACS or copy the `custom_components/udm_rule_manager` directory to your `config/custom_components` directory.
+Install via HACS or copy the `custom_components/udm_network_rules` directory to your `config/custom_components` directory.
 
 1. Using HACS, search for "Unifi Network Rule Manager" and select it.
 2. Restart Home Assistant.
