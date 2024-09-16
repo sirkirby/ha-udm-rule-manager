@@ -1,5 +1,5 @@
 {
-    "domain": "unifi_network_rule_manager",
+    "domain": "unifi_network_rules",
     "name": "Unifi Network Rule Manager",
     "documentation": "https://github.com/sirkirby/ha_udm_rule_manager",
     "integration_type": "hub",
