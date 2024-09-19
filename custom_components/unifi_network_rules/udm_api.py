@@ -1,9 +1,7 @@
 import aiohttp
 import asyncio
-import async_timeout
 import logging
-import json
-import ssl
+from datetime import datetime, timedelta
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -14,6 +12,20 @@ class UDMAPI:
         self.password = password
         self.cookies = None
         self.csrf_token = None
+        self.last_login = None
+        self.session_timeout = timedelta(hours=1)  # Adjust this value based on UDM's session timeout
+
+    async def ensure_logged_in(self):
+        """Ensure the API is logged in, refreshing the session if necessary."""
+        if not self.cookies or not self.csrf_token or self._is_session_expired():
+            return await self.login()
+        return True
+
+    def _is_session_expired(self):
+        """Check if the current session has expired."""
+        if not self.last_login:
+            return True
+        return datetime.now() - self.last_login > self.session_timeout
 
     async def login(self):
         """Log in to the UDM and obtain necessary tokens."""
@@ -25,6 +37,7 @@ class UDMAPI:
                     if response.status == 200:
                         self.cookies = response.cookies
                         self.csrf_token = response.headers.get('x-csrf-token')
+                        self.last_login = datetime.now()
                         _LOGGER.info("Successfully logged in to UDM")
                         return True
                     else:
@@ -35,9 +48,8 @@ class UDMAPI:
                 return False
 
     async def get_traffic_rules(self):
-        if not self.cookies or not self.csrf_token:
-            if not await self.login():
-                return None
+        if not await self.ensure_logged_in():
+            return None
 
         url = f"https://{self.host}/proxy/network/v2/api/site/default/trafficrules"
         headers = {'x-csrf-token': self.csrf_token, 'Accept': 'application/json'}
@@ -55,9 +67,8 @@ class UDMAPI:
                 return None
 
     async def get_firewall_rules(self):
-        if not self.cookies or not self.csrf_token:
-            if not await self.login():
-                return None
+        if not await self.ensure_logged_in():
+            return None
 
         url = f"https://{self.host}/proxy/network/api/s/default/rest/firewallrule"
         headers = {'x-csrf-token': self.csrf_token, 'Accept': 'application/json'}
@@ -76,9 +87,8 @@ class UDMAPI:
                 return None
 
     async def toggle_traffic_rule(self, rule_id, enabled):
-        if not self.cookies or not self.csrf_token:
-            if not await self.login():
-                return False, "Failed to login"
+        if not await self.ensure_logged_in():
+            return False, "Failed to login"
 
         url_get = f"https://{self.host}/proxy/network/v2/api/site/default/trafficrule/{rule_id}"
         url_put = f"https://{self.host}/proxy/network/v2/api/site/default/trafficrules/{rule_id}"
@@ -121,9 +131,8 @@ class UDMAPI:
                 return False, f"Error toggling rule: {str(e)}"
 
     async def toggle_firewall_rule(self, rule_id, enabled):
-        if not self.cookies or not self.csrf_token:
-            if not await self.login():
-                return False, "Failed to login"
+        if not await self.ensure_logged_in():
+            return False, "Failed to login"
 
         url = f"https://{self.host}/proxy/network/api/s/default/rest/firewallrule/{rule_id}"
         headers = {
