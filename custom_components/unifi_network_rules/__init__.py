@@ -6,6 +6,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_HOST, CONF_USERNAME, CONF_PASSWORD
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers import config_validation as cv
 
 from .const import DOMAIN
 from .udm_api import UDMAPI
@@ -14,6 +15,8 @@ _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[str] = ["switch"]
 UPDATE_INTERVAL = timedelta(minutes=5)
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the UDM Rule Manager component."""
