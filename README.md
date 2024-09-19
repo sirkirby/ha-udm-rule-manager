@@ -1,27 +1,34 @@
-# Unifi Network Rule Manager
+# Unifi Network Rules Custom Integration
 
-Integrates with your Unifi Dream Machine to allow basic management of firewall rules within Home Assistant.
+Pulls firewall and traffic rules from your Unifi Dream Machine and allows you to enable/disable them in Home Assistant.
 
 ## Installation
 
-Install via HACS or copy the `custom_components/udm_network_rules` directory to your `config/custom_components` directory.
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=sirkirby&repository=unifi-network-rules&category=integration)
 
-1. Using HACS, search for "Unifi Network Rule Manager" and select it.
-2. Restart Home Assistant.
-3. In the Home Assistant configuration page, click on "Integrations".
-4. Click on the "+" button in the bottom right corner.
-5. Search for "Unifi Network Rule Manager" and select it.
-6. Enter your Unifi Network credentials and click on the "Submit" button.
+OR
+
+Copy the`custom_components/unifi_network_rules` directory to your `config/custom_components` directory.
+
+THEN
+
+1. Restart Home Assistant.
+2. In the Home Assistant configuration page, click on "Integrations".
+3. Click on the "+" button in the bottom right corner.
+4. Search for "Unifi Network Rule Manager" and select it.
+5. Enter credentials of a local admin user on your UDM and click on the "Submit" button.
 
 ## Configuration
 
-Host: The IP address of your Unifi Dream Machine.
-Username: The local admin account on the UDM.
-Password: The password for the UDM account.
+**Host**: The IP address of your Unifi Dream Machine.
+
+**Username**: The local admin account on the UDM.
+
+**Password**: The password for the UDM account.
 
 ## Usage
 
-Once you have configured the integration, you will be able to see the firewall rules for your Unifi Network in Home Assistant. Each rule will be a switch that you can toggle on and off manually or via automations.
+Once you have configured the integration, you will be able to see the firewall rules configured on your Unifi Network as switches in Home Assistant. Add the switch to a custom dashboard or use it in automations just like any other Home Assistant switch.
 
 ## Limitations
 
