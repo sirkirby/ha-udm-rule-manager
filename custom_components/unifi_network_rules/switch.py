@@ -18,11 +18,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
 
     entities = []
 
-    if coordinator.data['traffic_rules']:
+    if coordinator.data.get('traffic_rules'):
         for rule in coordinator.data['traffic_rules']:
             entities.append(UDMTrafficRuleSwitch(coordinator, api, rule))
 
-    if coordinator.data['firewall_rules']:
+    if coordinator.data.get('firewall_rules'):
         for rule in coordinator.data['firewall_rules']:
             entities.append(UDMFirewallRuleSwitch(coordinator, api, rule))
 
@@ -77,20 +77,10 @@ class UDMRuleSwitch(CoordinatorEntity, SwitchEntity):
         
         self.async_write_ha_state()
 
-    @property
-    def available(self):
-        """Return if entity is available."""
-        return self.coordinator.last_update_success
-
-    async def async_added_to_hass(self):
-        """When entity is added to hass."""
-        await super().async_added_to_hass()
-        self._handle_coordinator_update()
-
     @callback
     def _handle_coordinator_update(self):
         """Handle updated data from the coordinator."""
-        rules = self.coordinator.data[f'{self._rule_type}_rules']
+        rules = self.coordinator.data.get(f'{self._rule_type}_rules', [])
         for rule in rules:
             if rule['_id'] == self._rule['_id']:
                 self._rule = rule
