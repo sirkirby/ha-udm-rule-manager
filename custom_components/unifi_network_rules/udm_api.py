@@ -7,10 +7,12 @@ from datetime import datetime, timedelta
 _LOGGER = logging.getLogger(__name__)
 
 class UDMAPI:
-    def __init__(self, host, username, password):
+    def __init__(self, host, username, password, max_retries=3, retry_delay=1):
         self.host = host
         self.username = username
         self.password = password
+        self.max_retries = max_retries
+        self.retry_delay = retry_delay
         self.cookies = None
         self.csrf_token = None
         self.last_login = None
