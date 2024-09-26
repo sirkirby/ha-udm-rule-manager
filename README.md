@@ -30,6 +30,22 @@ THEN
 
 Once you have configured the integration, you will be able to see the firewall rules configured on your Unifi Network as switches in Home Assistant. Add the switch to a custom dashboard or use it in automations just like any other Home Assistant switch.
 
+## Local Development
+
+To run the tests, you need to install the dependencies in the `requirements_test.txt` file.
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements_test.txt
+```
+
+Then run the tests:
+
+```bash
+pytest tests
+```
+
 ## Limitations
 
 The integration is currently limited to managing firewall and traffic rules. It does not currently support managing other types of rules.
