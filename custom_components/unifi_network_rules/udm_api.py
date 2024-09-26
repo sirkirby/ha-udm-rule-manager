@@ -18,10 +18,13 @@ class UDMAPI:
         self.last_login = None
         self.session_timeout = timedelta(hours=1)  # Adjust this value based on UDM's session timeout
 
-    async def ensure_logged_in(self):
+    async def ensure_logged_in(self) -> bool:
         """Ensure the API is logged in, refreshing the session if necessary."""
         if not self.cookies or not self.csrf_token or self._is_session_expired():
-            return await self.login()
+            success, error = await self.login()
+            if not success:
+                _LOGGER.error(f"Failed to log in: {error}")
+                return False
         return True
 
     def _is_session_expired(self):
@@ -136,6 +139,9 @@ class UDMAPI:
         success, rule_data, error = await self._make_authenticated_request('get', url_get, headers)
         if not success:
             return False, f"Failed to fetch rule: {error}"
+        
+        if not rule_data:
+            return False, f"Rule with id {rule_id} not found"
 
         # Update the 'enabled' field
         rule_data['enabled'] = enabled
@@ -159,7 +165,10 @@ class UDMAPI:
         if not success:
             return False, f"Failed to fetch rule: {error}"
 
-        rule_data = data.get('data', [])[0]
+        if not data or not data.get('data') or len(data['data']) == 0:
+            return False, f"Rule with id {rule_id} not found"
+
+        rule_data = data['data'][0]
         _LOGGER.debug(f"Firewall rule retrieved: {rule_data}")
 
         # Update the 'enabled' field

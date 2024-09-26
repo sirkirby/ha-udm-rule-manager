@@ -2,3 +2,4 @@ pytest
 pytest-asyncio
 pytest-aiohttp
 homeassistant
+freezegun==1.1.0
