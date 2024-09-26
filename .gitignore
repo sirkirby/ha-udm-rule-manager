@@ -170,6 +170,9 @@ venv/
 __pycache__/
 *.pyc
 
+# JetBrains settings
+.idea/
+
 # VSCode settings
 .vscode/
 
