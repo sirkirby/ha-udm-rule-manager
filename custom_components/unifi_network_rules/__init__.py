@@ -44,13 +44,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         try:
             traffic_success, traffic_rules, traffic_error = await api.get_traffic_rules()
             firewall_success, firewall_rules, firewall_error = await api.get_firewall_rules()
+            routes_success, traffic_routes, routes_error = await api.get_traffic_routes()
 
             if not traffic_success:
                 raise Exception(f"Failed to fetch traffic rules: {traffic_error}")
             if not firewall_success:
                 raise Exception(f"Failed to fetch firewall rules: {firewall_error}")
+            if not routes_success:
+                raise Exception(f"Failed to fetch traffic routes: {routes_error}")
 
-            return {"traffic_rules": traffic_rules, "firewall_rules": firewall_rules}
+            return {
+                "traffic_rules": traffic_rules,
+                "firewall_rules": firewall_rules,
+                "traffic_routes": traffic_routes
+            }
         except Exception as e:
             _LOGGER.error(f"Error updating data: {str(e)}")
             raise
