@@ -9,13 +9,12 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers import config_validation as cv
 from homeassistant.exceptions import ConfigEntryNotReady
 
-from .const import DOMAIN, CONF_MAX_RETRIES, CONF_RETRY_DELAY, DEFAULT_MAX_RETRIES, DEFAULT_RETRY_DELAY
+from .const import DOMAIN, CONF_MAX_RETRIES, CONF_RETRY_DELAY, DEFAULT_MAX_RETRIES, DEFAULT_RETRY_DELAY, CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
 from .udm_api import UDMAPI
 
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[str] = ["switch"]
-UPDATE_INTERVAL = timedelta(minutes=5)
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
@@ -29,6 +28,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     host = entry.data[CONF_HOST]
     username = entry.data[CONF_USERNAME]
     password = entry.data[CONF_PASSWORD]
+    update_interval = entry.data.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
     max_retries = entry.data.get(CONF_MAX_RETRIES, DEFAULT_MAX_RETRIES)
     retry_delay = entry.data.get(CONF_RETRY_DELAY, DEFAULT_RETRY_DELAY)
 
@@ -44,13 +44,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         try:
             traffic_success, traffic_rules, traffic_error = await api.get_traffic_rules()
             firewall_success, firewall_rules, firewall_error = await api.get_firewall_rules()
+            routes_success, traffic_routes, routes_error = await api.get_traffic_routes()
 
             if not traffic_success:
                 raise Exception(f"Failed to fetch traffic rules: {traffic_error}")
             if not firewall_success:
                 raise Exception(f"Failed to fetch firewall rules: {firewall_error}")
+            if not routes_success:
+                raise Exception(f"Failed to fetch traffic routes: {routes_error}")
 
-            return {"traffic_rules": traffic_rules, "firewall_rules": firewall_rules}
+            return {
+                "traffic_rules": traffic_rules,
+                "firewall_rules": firewall_rules,
+                "traffic_routes": traffic_routes
+            }
         except Exception as e:
             _LOGGER.error(f"Error updating data: {str(e)}")
             raise
@@ -60,7 +67,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER,
         name="udm_rule_manager",
         update_method=async_update_data,
-        update_interval=UPDATE_INTERVAL,
+        update_interval=timedelta(minutes=update_interval),
     )
 
     # Fetch initial data

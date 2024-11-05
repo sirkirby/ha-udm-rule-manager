@@ -182,3 +182,42 @@ class UDMAPI:
         else:
             _LOGGER.error(f"Failed to toggle firewall rule {rule_id}: {error}")
             return False, f"Failed to toggle rule: {error}"
+        
+    async def get_traffic_routes(self) -> Tuple[bool, Optional[List[Dict[str, Any]]], Optional[str]]:
+        """Fetch traffic routes from the UDM."""
+        url = f"https://{self.host}/proxy/network/v2/api/site/default/trafficroutes"
+        headers = {'Accept': 'application/json'}
+        
+        success, data, error = await self._make_authenticated_request('get', url, headers)
+        if success:
+            _LOGGER.debug("Successfully fetched traffic routes")
+            return True, data, None
+        else:
+            _LOGGER.error(f"Failed to fetch traffic routes: {error}")
+            return False, None, error
+
+    async def toggle_traffic_route(self, route_id: str, enabled: bool) -> Tuple[bool, Optional[str]]:
+        """Toggle a traffic route on or off."""
+        url = f"https://{self.host}/proxy/network/v2/api/site/default/trafficroutes/{route_id}"
+        headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
+
+        # First, get all routes and find the one we want to modify
+        success, routes, error = await self.get_traffic_routes()
+        if not success:
+            return False, f"Failed to fetch routes: {error}"
+
+        route_data = next((route for route in routes if route['_id'] == route_id), None)
+        if not route_data:
+            return False, f"Route with id {route_id} not found"
+
+        # Update the 'enabled' field
+        route_data['enabled'] = enabled
+
+        # Send the PUT request with the updated data
+        success, _, error = await self._make_authenticated_request('put', url, headers, route_data)
+        if success:
+            _LOGGER.info(f"Successfully toggled traffic route {route_id} to {'on' if enabled else 'off'}")
+            return True, None
+        else:
+            _LOGGER.error(f"Failed to toggle traffic route {route_id}: {error}")
+            return False, f"Failed to toggle route: {error}"
