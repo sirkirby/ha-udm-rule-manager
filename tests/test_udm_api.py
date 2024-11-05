@@ -342,3 +342,188 @@ async def test_make_authenticated_request_unexpected_error(udm_api):
         assert success == False
         assert data is None
         assert "Unexpected error during request" in error
+
+@pytest.mark.asyncio
+async def test_get_traffic_routes_success(udm_api):
+    """Test successful retrieval of traffic routes."""
+    mock_routes = [
+        {
+            "_id": "6394f963e232e25ab3cbc597",
+            "description": "Test Route 1",
+            "enabled": True,
+            "matching_target": "INTERNET",
+            "target_devices": [{"client_mac": "00:11:22:33:44:55", "type": "CLIENT"}]
+        },
+        {
+            "_id": "6394fbd1e232e25ab3cbc7a2",
+            "description": "Test Route 2",
+            "enabled": False,
+            "matching_target": "DOMAIN",
+            "domains": [{"domain": "example.com"}]
+        }
+    ]
+    
+    with patch.object(udm_api, '_make_authenticated_request') as mock_request:
+        mock_request.return_value = (True, mock_routes, None)
+        
+        success, routes, error = await udm_api.get_traffic_routes()
+        
+        assert success is True
+        assert routes == mock_routes
+        assert error is None
+        mock_request.assert_called_once_with(
+            'get',
+            f'https://{udm_api.host}/proxy/network/v2/api/site/default/trafficroutes',
+            {'Accept': 'application/json'}
+        )
+
+@pytest.mark.asyncio
+async def test_get_traffic_routes_failure(udm_api):
+    """Test failed retrieval of traffic routes."""
+    with patch.object(udm_api, '_make_authenticated_request') as mock_request:
+        mock_request.return_value = (False, None, "API Error")
+        
+        success, routes, error = await udm_api.get_traffic_routes()
+        
+        assert success is False
+        assert routes is None
+        assert error == "API Error"
+
+@pytest.mark.asyncio
+async def test_toggle_traffic_route_success(udm_api):
+    """Test successful toggling of a traffic route."""
+    route_id = "6394f963e232e25ab3cbc597"
+    mock_route = {
+        "_id": route_id,
+        "description": "Test Route",
+        "enabled": False,
+        "matching_target": "INTERNET",
+        "target_devices": []
+    }
+    
+    with patch.object(udm_api, '_make_authenticated_request') as mock_request, \
+         patch.object(udm_api, 'get_traffic_routes') as mock_get_routes:
+        # Mock the GET request for all routes
+        mock_get_routes.return_value = (True, [mock_route], None)
+        
+        # Mock the PUT request for updating the route
+        mock_request.return_value = (True, None, None)
+        
+        success, error = await udm_api.toggle_traffic_route(route_id, True)
+        
+        assert success is True
+        assert error is None
+        
+        # Verify the PUT request was made with the correct data
+        expected_url = f'https://{udm_api.host}/proxy/network/v2/api/site/default/trafficroutes/{route_id}'
+        expected_headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
+        expected_data = {**mock_route, 'enabled': True}
+        
+        mock_request.assert_called_once_with('put', expected_url, expected_headers, expected_data)
+
+@pytest.mark.asyncio
+async def test_toggle_traffic_route_not_found(udm_api):
+    """Test toggling a non-existent traffic route."""
+    route_id = "nonexistent_id"
+    
+    with patch.object(udm_api, 'get_traffic_routes') as mock_get_routes:
+        mock_get_routes.return_value = (True, [], None)
+        
+        success, error = await udm_api.toggle_traffic_route(route_id, True)
+        
+        assert success is False
+        assert "Route with id nonexistent_id not found" in error
+
+@pytest.mark.asyncio
+async def test_toggle_traffic_route_get_failure(udm_api):
+    """Test failure to fetch routes when trying to toggle."""
+    route_id = "6394f963e232e25ab3cbc597"
+    
+    with patch.object(udm_api, 'get_traffic_routes') as mock_get_routes:
+        mock_get_routes.return_value = (False, None, "Failed to fetch routes")
+        
+        success, error = await udm_api.toggle_traffic_route(route_id, True)
+        
+        assert success is False
+        assert "Failed to fetch routes" in error
+
+@pytest.mark.asyncio
+async def test_toggle_traffic_route_update_failure(udm_api):
+    """Test failure when updating a traffic route."""
+    route_id = "6394f963e232e25ab3cbc597"
+    mock_route = {
+        "_id": route_id,
+        "description": "Test Route",
+        "enabled": False,
+        "matching_target": "INTERNET",
+        "target_devices": []
+    }
+    
+    with patch.object(udm_api, '_make_authenticated_request') as mock_request, \
+         patch.object(udm_api, 'get_traffic_routes') as mock_get_routes:
+        # Mock successful GET but failed PUT
+        mock_get_routes.return_value = (True, [mock_route], None)
+        mock_request.return_value = (False, None, "Update failed")
+        
+        success, error = await udm_api.toggle_traffic_route(route_id, True)
+        
+        assert success is False
+        assert "Failed to toggle route: Update failed" in error
+
+@pytest.mark.asyncio
+async def test_toggle_traffic_route_preserve_data(udm_api):
+    """Test that toggling a route preserves all original data except enabled state."""
+    route_id = "6394f963e232e25ab3cbc597"
+    mock_route = {
+        "_id": route_id,
+        "description": "Test Route",
+        "enabled": False,
+        "matching_target": "DOMAIN",
+        "domains": [{"domain": "example.com", "ports": [80, 443]}],
+        "target_devices": [{"client_mac": "00:11:22:33:44:55", "type": "CLIENT"}],
+        "network_id": "network123",
+        "kill_switch_enabled": True,
+        "ip_addresses": ["192.168.1.1"],
+        "ip_ranges": ["10.0.0.0/24"]
+    }
+    
+    with patch.object(udm_api, '_make_authenticated_request') as mock_request, \
+         patch.object(udm_api, 'get_traffic_routes') as mock_get_routes:
+        mock_get_routes.return_value = (True, [mock_route], None)
+        mock_request.return_value = (True, None, None)
+        
+        success, error = await udm_api.toggle_traffic_route(route_id, True)
+        
+        assert success is True
+        assert error is None
+        
+        # Verify all data was preserved except enabled state
+        expected_data = {**mock_route, 'enabled': True}
+        mock_request.assert_called_once()
+        actual_data = mock_request.call_args[0][3]
+        assert actual_data == expected_data
+        assert all(actual_data[key] == mock_route[key] for key in mock_route if key != 'enabled')
+
+@pytest.mark.asyncio
+async def test_get_traffic_routes_empty_response(udm_api):
+    """Test handling of empty response when getting traffic routes."""
+    with patch.object(udm_api, '_make_authenticated_request') as mock_request:
+        mock_request.return_value = (True, [], None)
+        
+        success, routes, error = await udm_api.get_traffic_routes()
+        
+        assert success is True
+        assert routes == []
+        assert error is None
+
+@pytest.mark.asyncio
+async def test_get_traffic_routes_invalid_response(udm_api):
+    """Test handling of invalid response when getting traffic routes."""
+    with patch.object(udm_api, '_make_authenticated_request') as mock_request:
+        mock_request.return_value = (True, None, None)
+        
+        success, routes, error = await udm_api.get_traffic_routes()
+        
+        assert success is True
+        assert routes is None
+        assert error is None
