@@ -1,6 +1,13 @@
 # Unifi Network Rules Custom Integration
 
-Pulls firewall, traffic rules, and traffic routes from your Unifi Dream Machine and allows you to enable/disable them in Home Assistant.
+Pulls firewall policies and traffic routes from your Unifi Dream Machine and allows you to enable/disable them in Home Assistant.
+
+## Requirements
+
+A Unifi Dream Machine (UDM) running network application 9.0.92 or later.
+
+> [!NOTE]
+> For version 8.x.x of the Unifi Network application, please use the v.0.3.x release of this integration.
 
 ## Installation
 
@@ -28,7 +35,7 @@ THEN
 
 ## Usage
 
-Once you have configured the integration, you will be able to see the firewall rules and traffic routes configured on your Unifi Network as switches in Home Assistant. Add the switch to a custom dashboard or use it in automations just like any other Home Assistant switch.
+Once you have configured the integration, you will be able to see the firewall policies and traffic routes configured on your Unifi Network as switches in Home Assistant. Add the switch to a custom dashboard or use it in automations just like any other Home Assistant switch.
 
 ## Local Development
 

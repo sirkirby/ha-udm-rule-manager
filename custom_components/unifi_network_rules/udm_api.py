@@ -103,86 +103,6 @@ class UDMAPI:
 
         return False, None, "Max retries reached"
 
-    async def get_traffic_rules(self) -> Tuple[bool, Optional[List[Dict[str, Any]]], Optional[str]]:
-        """Fetch traffic rules from the UDM."""
-        url = f"https://{self.host}/proxy/network/v2/api/site/default/trafficrules"
-        headers = {'Accept': 'application/json'}
-        
-        success, data, error = await self._make_authenticated_request('get', url, headers)
-        if success:
-            _LOGGER.debug("Successfully fetched traffic rules")
-            return True, data, None
-        else:
-            _LOGGER.error(f"Failed to fetch traffic rules: {error}")
-            return False, None, error
-
-    async def get_firewall_rules(self) -> Tuple[bool, Optional[List[Dict[str, Any]]], Optional[str]]:
-        """Fetch firewall rules from the UDM."""
-        url = f"https://{self.host}/proxy/network/api/s/default/rest/firewallrule"
-        headers = {'Accept': 'application/json'}
-        
-        success, data, error = await self._make_authenticated_request('get', url, headers)
-        if success:
-            _LOGGER.debug("Successfully fetched firewall rules")
-            return True, data.get('data', []), None
-        else:
-            _LOGGER.error(f"Failed to fetch firewall rules: {error}")
-            return False, None, error
-
-    async def toggle_traffic_rule(self, rule_id: str, enabled: bool) -> Tuple[bool, Optional[str]]:
-        """Toggle a traffic rule on or off."""
-        url_get = f"https://{self.host}/proxy/network/v2/api/site/default/trafficrule/{rule_id}"
-        url_put = f"https://{self.host}/proxy/network/v2/api/site/default/trafficrules/{rule_id}"
-        headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
-
-        # First, get the current rule data
-        success, rule_data, error = await self._make_authenticated_request('get', url_get, headers)
-        if not success:
-            return False, f"Failed to fetch rule: {error}"
-        
-        if not rule_data:
-            return False, f"Rule with id {rule_id} not found"
-
-        # Update the 'enabled' field
-        rule_data['enabled'] = enabled
-
-        # Now, send the PUT request with the updated data
-        success, _, error = await self._make_authenticated_request('put', url_put, headers, rule_data)
-        if success:
-            _LOGGER.info(f"Successfully toggled traffic rule {rule_id} to {'on' if enabled else 'off'}")
-            return True, None
-        else:
-            _LOGGER.error(f"Failed to toggle traffic rule {rule_id}: {error}")
-            return False, f"Failed to toggle rule: {error}"
-
-    async def toggle_firewall_rule(self, rule_id: str, enabled: bool) -> Tuple[bool, Optional[str]]:
-        """Toggle a firewall rule on or off."""
-        url = f"https://{self.host}/proxy/network/api/s/default/rest/firewallrule/{rule_id}"
-        headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
-
-        # First, get the current rule data
-        success, data, error = await self._make_authenticated_request('get', url, headers)
-        if not success:
-            return False, f"Failed to fetch rule: {error}"
-
-        if not data or not data.get('data') or len(data['data']) == 0:
-            return False, f"Rule with id {rule_id} not found"
-
-        rule_data = data['data'][0]
-        _LOGGER.debug(f"Firewall rule retrieved: {rule_data}")
-
-        # Update the 'enabled' field
-        rule_data['enabled'] = enabled
-
-        # Now, send the PUT request with the updated data
-        success, _, error = await self._make_authenticated_request('put', url, headers, rule_data)
-        if success:
-            _LOGGER.info(f"Successfully toggled firewall rule {rule_id} to {'on' if enabled else 'off'}")
-            return True, None
-        else:
-            _LOGGER.error(f"Failed to toggle firewall rule {rule_id}: {error}")
-            return False, f"Failed to toggle rule: {error}"
-        
     async def get_traffic_routes(self) -> Tuple[bool, Optional[List[Dict[str, Any]]], Optional[str]]:
         """Fetch traffic routes from the UDM."""
         url = f"https://{self.host}/proxy/network/v2/api/site/default/trafficroutes"
@@ -201,7 +121,7 @@ class UDMAPI:
         url = f"https://{self.host}/proxy/network/v2/api/site/default/trafficroutes/{route_id}"
         headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
 
-        # First, get all routes and find the one we want to modify
+        # First get all routes and find the one we want to modify
         success, routes, error = await self.get_traffic_routes()
         if not success:
             return False, f"Failed to fetch routes: {error}"
@@ -221,3 +141,46 @@ class UDMAPI:
         else:
             _LOGGER.error(f"Failed to toggle traffic route {route_id}: {error}")
             return False, f"Failed to toggle route: {error}"
+    
+    async def get_firewall_policies(self) -> Tuple[bool, Optional[List[Dict[str, Any]]], Optional[str]]:
+        """Fetch all firewall policies from the UDM."""
+        url = f"https://{self.host}/proxy/network/v2/api/site/default/firewall-policies"
+        headers = {'Accept': 'application/json'}
+        
+        success, data, error = await self._make_authenticated_request('get', url, headers)
+        if success:
+            _LOGGER.debug("Successfully fetched firewall policies")
+            return True, data, None
+        else:
+            _LOGGER.error(f"Failed to fetch firewall policies: {error}")
+            return False, None, error
+
+    async def get_firewall_policy(self, policy_id: str) -> Tuple[bool, Optional[Dict[str, Any]], Optional[str]]:
+        """Fetch a single firewall policy from the UDM."""
+        url = f"https://{self.host}/proxy/network/v2/api/site/default/firewall-policies/{policy_id}"
+        headers = {'Accept': 'application/json'}
+        
+        success, data, error = await self._make_authenticated_request('get', url, headers)
+        if success:
+            return True, data, None
+        else:
+            _LOGGER.error(f"Failed to fetch firewall policy {policy_id}: {error}")
+            return False, None, error
+
+    async def toggle_firewall_policy(self, policy_id: str, enabled: bool) -> Tuple[bool, Optional[str]]:
+        """Toggle a firewall policy on or off."""
+        success, policy, error = await self.get_firewall_policy(policy_id)
+        if not success:
+            return False, f"Failed to fetch policy: {error}"
+
+        policy['enabled'] = enabled
+
+        url = f"https://{self.host}/proxy/network/v2/api/site/default/firewall-policies/{policy_id}"
+        headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
+
+        success, _, error = await self._make_authenticated_request('put', url, headers, policy)
+        if success:
+            _LOGGER.info(f"Successfully toggled firewall policy {policy_id} to {'on' if enabled else 'off'}")
+            return True, None
+        else:
+            return False, f"Failed to toggle policy: {error}"
