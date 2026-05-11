@@ -8,13 +8,12 @@
 [![issues][issues-shield]][issues-link]
 [![validate-badge]][validate-workflow]
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/sirkirby)
-
 UniFi Network Rules is a custom integration for Home Assistant that integrates with your UniFi Dream Machine/Router to both provide and help you create useful interactions and automations for your Home Lab. The goal of this integration is to simplify policy and rule management for real world use cases. I built this because I wanted to unlock the power of my UniFi firewall. From simple things like screen time and game server access controls for my kids, to more advanced like getting notified when a critical rule is changed and automatically backing up your rules. And most importantly, make all of this easy to use and share with anyone in your home or home lab. I hope you find it useful!
 
 > 📖 **[Quick Start Guide](QUICKSTART.md)** — Installation, setup, and troubleshooting
 > 🤝 **[Contributing](CONTRIBUTING.md)** — Development setup and PR workflow
 > 🔒 **[Security](SECURITY.md)** — Vulnerability reporting policy
+> 💗 **[Sponsor](https://github.com/sponsors/sirkirby)** — Support maintenance, Home Assistant compatibility, UniFi API testing, and releases. See [what sponsorship funds](FUNDING.md).
 
 ## What this integration provides
 
