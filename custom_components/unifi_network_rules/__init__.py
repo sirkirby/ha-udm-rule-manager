@@ -53,6 +53,49 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     return True
 
 
+def _async_migrate_legacy_entity_domain(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Rename entities registered under ``unifi_network_rules.*`` to ``switch.*``.
+
+    Older versions of this integration used ``DOMAIN`` as the entity_id prefix,
+    which Home Assistant began warning about and will reject in 2027.5. Runs
+    once per setup; after the first successful pass there is nothing to do.
+    """
+    registry = async_get_entity_registry(hass)
+    legacy = [
+        e for e in registry.entities.values()
+        if e.config_entry_id == entry.entry_id
+        and e.platform == DOMAIN
+        and e.domain == DOMAIN
+    ]
+    if not legacy:
+        return
+
+    renamed = 0
+    skipped = 0
+    for entry_obj in legacy:
+        object_id = entry_obj.entity_id.split(".", 1)[1]
+        new_entity_id = f"switch.{object_id}"
+        if new_entity_id in registry.entities:
+            LOGGER.warning(
+                "Skipping migration of %s: %s already exists in the registry. "
+                "Resolve the collision manually (delete one of the entries).",
+                entry_obj.entity_id, new_entity_id,
+            )
+            skipped += 1
+            continue
+        try:
+            registry.async_update_entity(entry_obj.entity_id, new_entity_id=new_entity_id)
+            renamed += 1
+        except (ValueError, KeyError) as err:
+            LOGGER.warning("Failed to migrate %s -> %s: %s", entry_obj.entity_id, new_entity_id, err)
+            skipped += 1
+
+    LOGGER.info(
+        "Entity domain migration complete: renamed %d, skipped %d (issue #152)",
+        renamed, skipped,
+    )
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up UniFi Network Rules from a config entry."""
     install_aiounifi_log_redaction()
@@ -131,6 +174,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "api": api,
             "coordinator": coordinator,
         }
+
+        # Migrate any legacy entity_ids written under the integration's own domain
+        # (unifi_network_rules.*) over to switch.* — see issue #152. Must run before
+        # known_unique_ids is populated, since that filter requires domain == "switch".
+        _async_migrate_legacy_entity_domain(hass, entry)
 
         # Initialize known_unique_ids from entity registry BEFORE first refresh
         # This ensures proper entity discovery/deletion checking from the start

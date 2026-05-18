@@ -66,9 +66,10 @@ class UnifiRuleSwitch(CoordinatorEntity[UnifiRuleUpdateCoordinator], SwitchEntit
         # Get the object_id from our helper for consistency
         object_id = get_object_id(rule_data, rule_type)
 
-        # Set the entity_id properly using generate_entity_id helper
-        # This is the correct way to set a custom entity_id
-        self.entity_id = generate_entity_id(f"{DOMAIN}.{{}}", object_id, hass=coordinator.hass)
+        # Set the entity_id properly using generate_entity_id helper.
+        # The domain prefix must match the platform (switch), not the integration's
+        # DOMAIN constant — HA validates this and warns about a forced removal in 2027.5.
+        self.entity_id = generate_entity_id("switch.{}", object_id, hass=coordinator.hass)
 
         # Set has_entity_name to False to ensure the entity name is shown in UI
         self._attr_has_entity_name = False
