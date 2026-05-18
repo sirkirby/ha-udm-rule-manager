@@ -1,13 +1,8 @@
 version: 3
-config_version: 6
+config_version: 9
 embedding:
   provider: ollama
   model: bge-m3
-daemon:
-  port: 28183
-  log_level: info
-  log_retention_days: 30
-  stale_session_threshold_ms: 3600000
 capture:
   transcript_paths: []
   plan_dirs: []
@@ -15,23 +10,24 @@ capture:
   artifact_extensions:
     - .md
   buffer_max_events: 500
+release_provenance:
+  enabled: true
+  production_refs:
+    - refs/tags/v*
+  integration_refs:
+    - origin/main
+  reconcile_interval_minutes: 15
+  production_debug_include_unknown: true
+  github:
+    repo: sirkirby/unifi-network-rules
+    token_env: GITHUB_TOKEN
+    max_lookups_per_run: 20
+  package_map: []
 agent:
   summary_batch_interval: 5
   scheduled_tasks_enabled: true
   event_tasks_enabled: true
-context:
-  digest_tier: 5000
-  session_start_digest_enabled: false
-  cortex_enabled: true
-  prompt_search: true
-  prompt_max_spores: 3
-backup: {}
-maintenance:
-  auto_optimize: true
-  auto_optimize_interval_hours: 24
-team:
-  enabled: false
-  interval_minutes: 15
+  cold_project_threshold_days: 14
 skills:
   confidence_threshold: 0.7
   usage_stale_days: 30
@@ -43,6 +39,50 @@ notifications:
     settings:
       enabled: true
       mode: banner
+cortex:
+  enabled: true
+  instructions:
+    inject_on_session_start: true
+  digest:
+    tier: 5000
+    inject_on_session_start: false
+  spores:
+    inject_on_prompt_submit: true
+    max_per_prompt: 3
+  canopy:
+    refresh:
+      background_enabled: true
+      background_period_minutes: 60
+    exclude:
+      default_patterns:
+        - .git
+        - .DS_Store
+        - node_modules
+        - __pycache__
+        - .venv
+        - venv
+        - env
+        - ENV
+        - .pytest_cache
+        - .ruff_cache
+        - .mypy_cache
+        - .tox
+        - dist
+        - build
+        - target
+        - .gradle
+        - .cache
+        - .next
+        - .nuxt
+        - .turbo
+        - .svelte-kit
+        - "**/*.lock"
+        - "**/package-lock.json"
+        - "**/pnpm-lock.yaml"
+        - "**/yarn.lock"
+      patterns: []
+    inject_on_pre_tool_use: true
+    min_file_bytes: 800
 appearance:
   theme: sage
   mode: dark
