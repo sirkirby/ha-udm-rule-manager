@@ -68,6 +68,7 @@ class CoordinatorStateManager:
             "port_profiles",
             "networks",
             "nat_rules",
+            "oon_policies",
         ]:
             prev_count = len(previous_data.get(rule_type, []))
             new_count = len(new_data.get(rule_type, []))
@@ -87,6 +88,7 @@ class CoordinatorStateManager:
             "wlans",
             "qos_rules",
             "nat_rules",
+            "oon_policies",
         ]:
             prev_rules = previous_data.get(rule_type, [])
             new_rules = new_data.get(rule_type, [])
@@ -286,6 +288,7 @@ class CoordinatorStateManager:
                 "networks",
                 "devices",
                 "nat_rules",
+                "oon_policies",
             ]
         )
 

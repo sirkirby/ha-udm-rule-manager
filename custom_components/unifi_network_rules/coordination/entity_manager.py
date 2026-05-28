@@ -352,23 +352,12 @@ class CoordinatorEntityManager:
 
         current_known_ids = set(self.coordinator.known_unique_ids)  # Take a snapshot
 
-        # Gather ALL unique IDs present in the new data
+        # Gather ALL unique IDs present in the new data. Mirrors the discovery
+        # map so any rule type the discovery side creates entities for is also
+        # checked here — otherwise entries in known_unique_ids for missing
+        # types get flagged as ghost deletions every cycle (issue #154).
         all_current_unique_ids = set()
-        all_rule_sources_types = [
-            "port_forwards",
-            "traffic_routes",
-            "static_routes",
-            "nat_rules",
-            "firewall_policies",
-            "traffic_rules",
-            "legacy_firewall_rules",
-            "qos_rules",
-            "wlans",
-            "vpn_clients",
-            "vpn_servers",
-            "port_profiles",
-            "networks",
-        ]
+        all_rule_sources_types = [rule_type for rule_type, _ in self._rule_type_entity_map]
 
         for rule_type in all_rule_sources_types:
             rules = new_data.get(rule_type, [])

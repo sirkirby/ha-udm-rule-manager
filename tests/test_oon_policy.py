@@ -273,3 +273,28 @@ class TestOONPolicyIntegration:
         detector = UnifiedChangeDetector(Mock(), Mock())
         assert "oon_policies" in detector._rule_type_mapping
         assert detector._rule_type_mapping["oon_policies"] == "oon_policy"
+
+    def test_deletion_check_does_not_orphan_oon_policies(self, oon_policy_payload):
+        """Regression for #154: OON policies present in current data must not
+        be flagged as deletions every cycle. The deletion-check iteration list
+        previously omitted "oon_policies", causing every OON ID in
+        known_unique_ids to be treated as a ghost deletion on every poll."""
+        from custom_components.unifi_network_rules.coordination.entity_manager import (
+            CoordinatorEntityManager,
+        )
+        from custom_components.unifi_network_rules.helpers.rule import get_rule_id
+
+        policy = OONPolicy(oon_policy_payload)
+        oon_unique_id = get_rule_id(policy)
+        assert oon_unique_id and oon_unique_id.startswith("unr_oon_")
+
+        coordinator = Mock()
+        coordinator._initial_update_done = True
+        coordinator.known_unique_ids = {oon_unique_id}
+
+        manager = CoordinatorEntityManager(Mock(), coordinator)
+        manager._process_deleted_rules = Mock()
+
+        manager.check_for_deleted_rules({"oon_policies": [policy]})
+
+        manager._process_deleted_rules.assert_not_called()
