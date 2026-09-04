@@ -85,6 +85,16 @@ Run `make fix` to auto-format your code before committing.
 - [ ] [`README.md`](README.md) updated if adding user-facing features
 - [ ] [`manifest.json`](custom_components/unifi_network_rules/manifest.json) updated if dependencies change
 
+## Maintainer Release Process
+
+1. Update `manifest.json` to the planned release version in a pull request.
+2. Merge the pull request only after all required checks pass.
+3. Tag the exact merge commit as `vX.Y.Z` and push the tag.
+4. Confirm the release, HACS, and hassfest workflows pass for the tag.
+
+The release workflow refuses to publish when the embedded manifest version does not exactly match the tag. Do not
+move or rewrite a published release tag.
+
 ## API Testing
 
 For manual API testing against a real UniFi device, the project maintains a [Bruno collection](https://github.com/sirkirby/bruno-udm-api) with the same requests the integration makes. This is useful for verifying credentials and device compatibility.
