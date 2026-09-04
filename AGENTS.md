@@ -1,23 +1,16 @@
-# AI Assistant Instructions
+# UniFi Network Rules
 
-This file contains instructions for AI assistants (Cursor, Codex CLI) when working with this project.
+This repository contains a Home Assistant custom integration for managing UniFi Network rules and related entities.
 
----
+## Architecture
 
-## Project Constitution
+- Support the current Home Assistant release on Python 3.14.2 or newer.
+- Use the coordinator as the canonical polling and state-management path.
+- Model API responses with typed classes in `models/` before adding API methods in `udm/` or entities in `switches/`.
+- Build switch entities on the shared base class and keep service orchestration in `services/`.
+- Preserve compatibility across supported UniFi controller versions through capability detection, not version guesses.
 
-This project follows engineering standards and conventions defined in the project constitution.
-
-**Read the constitution first:** [oak/constitution.md](oak/constitution.md)
-
-The constitution defines:
-- Architecture principles and patterns
-- Code standards and best practices
-- Testing requirements
-- Documentation standards
-- Governance and decision-making processes
-
-All suggestions and code generated must align with the constitution.
+## Code Standards
 
 - Type hints are required.
 - Follow Ruff lint + format rules defined in `pyproject.toml`. Do not disable rules inline without reason.

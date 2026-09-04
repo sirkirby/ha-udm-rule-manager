@@ -20,6 +20,7 @@ from aiounifi.models.port_forward import PortForward
 from aiounifi.models.traffic_route import TrafficRoute
 from aiounifi.models.traffic_rule import TrafficRule
 from aiounifi.models.wlan import Wlan
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_send
@@ -62,6 +63,8 @@ class UnifiRuleUpdateCoordinator(DataUpdateCoordinator):
         self,
         hass: HomeAssistant,
         api: UDMAPI,
+        *,
+        config_entry: ConfigEntry,
         update_interval: int = DEFAULT_UPDATE_INTERVAL,
         platforms: list[Platform] | None = None,
         smart_polling_config: dict[str, Any] | None = None,
@@ -70,15 +73,13 @@ class UnifiRuleUpdateCoordinator(DataUpdateCoordinator):
         super().__init__(
             hass,
             LOGGER,
+            config_entry=config_entry,
             name=DOMAIN,
             update_interval=timedelta(seconds=update_interval),
         )
 
         # Keep a reference to the API
         self.api = api
-
-        # Initialize config_entry to None - it will be looked up when needed
-        self.config_entry = None
 
         # Initialize coordination modules
         self.data_fetcher = CoordinatorDataFetcher(api, hass, self)

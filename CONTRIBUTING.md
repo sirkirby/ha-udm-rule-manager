@@ -12,7 +12,7 @@ Please create a [Feature Request](https://github.com/sirkirby/unifi-network-rule
 
 | Tool | Version |
 |---|---|
-| Python | 3.13+ |
+| Python | 3.14.2+ |
 | pip | Latest |
 | Git | Any recent version |
 
@@ -63,7 +63,7 @@ This runs linting and tests — the same checks that CI will run. Your PR will n
 
 The project uses [Ruff](https://docs.astral.sh/ruff/) for both linting and formatting, configured in [`pyproject.toml`](pyproject.toml):
 - Line length: 120 characters
-- Python target: 3.13
+- Python target: 3.14
 - Quote style: double quotes
 
 Run `make fix` to auto-format your code before committing.
@@ -91,7 +91,7 @@ For manual API testing against a real UniFi device, the project maintains a [Bru
 
 ## Project Standards
 
-For detailed coding standards, architectural patterns, and conventions, see the [Constitution](oak/constitution.md).
+For detailed coding standards, architectural patterns, and conventions, see [AGENTS.md](AGENTS.md).
 
 ## Getting Help
 

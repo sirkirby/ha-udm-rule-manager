@@ -1,15 +1,5 @@
 version: 3
-config_version: 9
-embedding:
-  provider: ollama
-  model: bge-m3
-capture:
-  transcript_paths: []
-  plan_dirs: []
-  ignore_plan_dirs_in_git: false
-  artifact_extensions:
-    - .md
-  buffer_max_events: 500
+config_version: 12
 release_provenance:
   enabled: true
   production_refs:
@@ -23,22 +13,6 @@ release_provenance:
     token_env: GITHUB_TOKEN
     max_lookups_per_run: 20
   package_map: []
-agent:
-  summary_batch_interval: 5
-  scheduled_tasks_enabled: true
-  event_tasks_enabled: true
-  cold_project_threshold_days: 14
-skills:
-  confidence_threshold: 0.7
-  usage_stale_days: 30
-notifications:
-  enabled: true
-  system_notifications: false
-  default_mode: summary
-  domains:
-    settings:
-      enabled: true
-      mode: banner
 cortex:
   enabled: true
   instructions:
@@ -83,6 +57,7 @@ cortex:
       patterns: []
     inject_on_pre_tool_use: true
     min_file_bytes: 800
+    enabled: true
 symbionts:
   claude-code:
     enabled: true

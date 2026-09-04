@@ -69,7 +69,16 @@ def mock_api():
 
 
 @pytest.fixture
-def coordinator(mock_hass, mock_api):
+def mock_config_entry():
+    """Return a mocked config entry."""
+    entry = Mock()
+    entry.entry_id = "test_entry"
+    entry.async_on_unload = Mock()
+    return entry
+
+
+@pytest.fixture
+def coordinator(mock_hass, mock_api, mock_config_entry):
     """Return a coordinator instance with real modules but mocked dependencies."""
     with (
         patch("unifi_network_rules.coordination.coordinator.SmartPollingManager") as mock_polling,
@@ -88,17 +97,18 @@ def coordinator(mock_hass, mock_api):
         mock_detector_instance.get_status.return_value = {"last_change": None}
         mock_detector.return_value = mock_detector_instance
 
-        coordinator = UnifiRuleUpdateCoordinator(mock_hass, mock_api)
+        coordinator = UnifiRuleUpdateCoordinator(mock_hass, mock_api, config_entry=mock_config_entry)
         return coordinator
 
 
 class TestCoordinatorInitialization:
     """Test coordinator initialization and module setup."""
 
-    def test_coordinator_initializes_correctly(self, coordinator, mock_hass, mock_api):
+    def test_coordinator_initializes_correctly(self, coordinator, mock_hass, mock_api, mock_config_entry):
         """Test that coordinator initializes with correct properties."""
         assert coordinator.hass == mock_hass
         assert coordinator.api == mock_api
+        assert coordinator.config_entry == mock_config_entry
         assert coordinator.name == "unifi_network_rules"
         assert coordinator.update_interval == timedelta(seconds=300)
 

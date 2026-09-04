@@ -11,7 +11,7 @@ Get from zero to a working UniFi Network Rules integration in minutes.
 |---|---|
 | Home Assistant | 2025.8.0+ |
 | UniFi Network Application | 9.0.92+ |
-| Python (HA runtime) | 3.13+ |
+| Python (HA runtime) | 3.14.2+ |
 | HACS | Latest recommended |
 
 You also need a **local admin account** on your UniFi device. Cloud-only (UniFi SSO) accounts will not work — the integration authenticates directly against the device's local API.

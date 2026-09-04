@@ -62,10 +62,9 @@ def _async_migrate_legacy_entity_domain(hass: HomeAssistant, entry: ConfigEntry)
     """
     registry = async_get_entity_registry(hass)
     legacy = [
-        e for e in registry.entities.values()
-        if e.config_entry_id == entry.entry_id
-        and e.platform == DOMAIN
-        and e.domain == DOMAIN
+        e
+        for e in registry.entities.values()
+        if e.config_entry_id == entry.entry_id and e.platform == DOMAIN and e.domain == DOMAIN
     ]
     if not legacy:
         return
@@ -79,7 +78,8 @@ def _async_migrate_legacy_entity_domain(hass: HomeAssistant, entry: ConfigEntry)
             LOGGER.warning(
                 "Skipping migration of %s: %s already exists in the registry. "
                 "Resolve the collision manually (delete one of the entries).",
-                entry_obj.entity_id, new_entity_id,
+                entry_obj.entity_id,
+                new_entity_id,
             )
             skipped += 1
             continue
@@ -92,7 +92,8 @@ def _async_migrate_legacy_entity_domain(hass: HomeAssistant, entry: ConfigEntry)
 
     LOGGER.info(
         "Entity domain migration complete: renamed %d, skipped %d (issue #152)",
-        renamed, skipped,
+        renamed,
+        skipped,
     )
 
 
@@ -142,12 +143,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         coordinator = UnifiRuleUpdateCoordinator(
             hass,
             api,
+            config_entry=entry,
             update_interval=baseline_interval,  # Use baseline for coordinator's built-in polling
             smart_polling_config=smart_polling_config,
         )
-
-        # Explicitly set the config_entry reference
-        coordinator.config_entry = entry
 
         # WebSocket removed - using smart polling only
         LOGGER.info("Smart polling architecture enabled - WebSocket disabled")

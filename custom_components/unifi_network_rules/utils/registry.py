@@ -9,6 +9,6 @@ if TYPE_CHECKING:
     from homeassistant.helpers.entity_registry import EntityRegistry
 
 
-def async_get_registry(hass: HomeAssistant) -> "EntityRegistry":
+def async_get_registry(hass: HomeAssistant) -> EntityRegistry:
     """Get entity registry."""
     return er_async_get(hass)

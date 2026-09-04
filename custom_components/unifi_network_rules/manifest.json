@@ -11,9 +11,8 @@
     "loggers": ["aiounifi"],
     "quality_scale": "custom",
     "requirements": [
-        "aiohttp",
-        "aiounifi>=91",
-        "orjson>=3.8.0"
+        "aiofiles==25.1.0",
+        "aiounifi==95"
     ],
     "version": "4.4.6"
 }
