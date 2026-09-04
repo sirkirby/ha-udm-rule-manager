@@ -468,7 +468,7 @@ class UnifiRuleSwitch(CoordinatorEntity[UnifiRuleUpdateCoordinator], SwitchEntit
         # Store the target state for when the debounce timer fires
         self._toggle_debounce_target_state = enable
 
-        # Schedule the debounced operation using get_running_loop (Python 3.13+ compliant)
+        # Schedule the debounced operation using the active event loop.
         loop = asyncio.get_running_loop()
         self._toggle_debounce_timer = loop.call_later(
             TOGGLE_DEBOUNCE_DELAY,

@@ -1,29 +1,30 @@
-# unifi-network-rules Development Guidelines
+# UniFi Network Rules Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2025-11-11
+Last updated: 2026-09-04
 
 ## Active Technologies
 
-- Python 3.13 + Home Assistant Core, aiounifi (local copy in `/aiounifi`), existing UNR coordinator infrastructure (001-oon-policies)
+- Python 3.14.2+, Home Assistant 2026.9, aiounifi 95, and the existing coordinator infrastructure
 
 ## Project Structure
 
 ```text
-src/
+custom_components/unifi_network_rules/
 tests/
 ```
 
 ## Commands
 
-cd src [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLOGIES] pytest [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLOGIES] ruff check .
+make lint
+make test
 
 ## Code Style
 
-Python 3.13: Follow standard conventions
+Follow the canonical project rules in `AGENTS.md`.
 
 ## Recent Changes
 
-- 001-oon-policies: Added Python 3.13 + Home Assistant Core, aiounifi (local copy in `/aiounifi`), existing UNR coordinator infrastructure
+- 001-oon-policies: Added OON policy support using the coordinator architecture.
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

@@ -87,9 +87,7 @@ _SENSITIVE_KEY_PARTS = (
 _IP_KEY_SUFFIXES = ("_ip", "_ipv6")
 _MAC_KEY_SUFFIXES = ("_mac", "_macs", "mac_address", "mac_addresses")
 _EMAIL_PATTERN = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.IGNORECASE)
-_IPV4_PATTERN = re.compile(
-    r"\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b"
-)
+_IPV4_PATTERN = re.compile(r"\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b")
 _MAC_PATTERN = re.compile(r"\b[0-9A-F]{2}(?::[0-9A-F]{2}){5}\b", re.IGNORECASE)
 _UNR_ENTITY_ID_PATTERN = re.compile(r"\b(?:switch\.)?unr_[a-z0-9_]+\b", re.IGNORECASE)
 _URL_AUTHORITY_PATTERN = re.compile(r"\b(?P<scheme>https?|wss?)://[^/\s)\]>'\"]+")
@@ -306,9 +304,7 @@ class RedactingLogFilter(logging.Filter):
 
 def _add_filter_if_missing(target: logging.Handler | logging.Logger) -> None:
     """Add the shared redaction filter to a logger or handler."""
-    if _LOG_REDACTION_FILTER is not None and not any(
-        existing is _LOG_REDACTION_FILTER for existing in target.filters
-    ):
+    if _LOG_REDACTION_FILTER is not None and not any(existing is _LOG_REDACTION_FILTER for existing in target.filters):
         target.addFilter(_LOG_REDACTION_FILTER)
 
 

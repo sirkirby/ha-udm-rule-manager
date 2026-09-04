@@ -3,8 +3,8 @@
 
 .PHONY: help venv install lint lint-fix format fix test test-cov test-watch clean check all
 
-# Detect venv - prefer existing venv/, then .venv/
-VENV_DIR := $(shell if [ -d "venv" ]; then echo "venv"; elif [ -d ".venv" ]; then echo ".venv"; else echo "venv"; fi)
+# Detect a working environment, or create a new .venv without overwriting stale environments.
+VENV_DIR := $(shell if [ -x "venv/bin/python" ]; then echo "venv"; elif [ -x ".venv/bin/python" ]; then echo ".venv"; else echo ".venv"; fi)
 VENV_BIN := $(VENV_DIR)/bin
 PYTHON := $(VENV_BIN)/python
 PIP := $(VENV_BIN)/pip
@@ -36,11 +36,11 @@ help:
 
 # Setup
 venv:
-	@if [ -d "venv" ] || [ -d ".venv" ]; then \
+	@if [ -x "$(PYTHON)" ]; then \
 		echo "Virtual environment already exists at $(VENV_DIR)/"; \
 	else \
 		echo "Creating virtual environment..."; \
-		python3 -m venv venv; \
+		python3 -m venv $(VENV_DIR); \
 		echo "Virtual environment created. Run 'make install' to install dependencies."; \
 	fi
 	@echo ""
@@ -53,6 +53,7 @@ install:
 # Linting
 lint:
 	$(RUFF) check custom_components/ tests/
+	$(RUFF) format --check custom_components/ tests/
 
 lint-fix:
 	$(RUFF) check --fix custom_components/ tests/
@@ -69,7 +70,7 @@ test:
 	$(PYTEST) tests/
 
 test-cov:
-	$(PYTEST) tests/ --cov=custom_components/unifi_network_rules --cov-report=term-missing --cov-report=html
+	$(PYTEST) tests/ --cov=custom_components/unifi_network_rules --cov-report=term-missing --cov-report=html --cov-fail-under=30
 	@echo ""
 	@echo "Coverage report generated: htmlcov/index.html"
 
