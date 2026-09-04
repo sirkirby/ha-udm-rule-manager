@@ -22,6 +22,27 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Verify manifest version matches tag
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          manifest_path = Path("custom_components/unifi_network_rules/manifest.json")
+          manifest_version = json.loads(manifest_path.read_text())["version"]
+          tag_version = os.environ["TAG_NAME"].removeprefix("v")
+
+          if manifest_version != tag_version:
+              raise SystemExit(
+                  f"manifest.json version {manifest_version} does not match tag {tag_version}"
+              )
+
+          print(f"manifest.json version matches tag: {tag_version}")
+          PY
+
       - name: Detect prerelease
         id: meta
         env:
